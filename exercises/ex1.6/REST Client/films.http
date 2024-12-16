@@ -27,3 +27,47 @@ Content-Type: application/json
     "director": "Test",
     "duration": -1
 }
+
+### Test DELETE
+DELETE http://localhost:3000/films/1
+
+### Test PATCH (mise à jour partielle)
+PATCH http://localhost:3000/films/2
+Content-Type: application/json
+
+{
+    "duration": 190,
+    "budget": 200
+}
+
+### Test PUT (mise à jour complète)
+PUT http://localhost:3000/films/3
+Content-Type: application/json
+
+{
+    "title": "Inception Updated",
+    "director": "Christopher Nolan",
+    "duration": 148,
+    "budget": 160,
+    "description": "Updated description",
+    "imageUrl": "https://example.com/inception.jpg"
+}
+
+### Test PUT (création avec ID spécifique)
+PUT http://localhost:3000/films/99
+Content-Type: application/json
+
+{
+    "title": "New Movie",
+    "director": "New Director",
+    "duration": 120,
+    "budget": 100
+}
+
+### Test PUT invalide (champs manquants)
+PUT http://localhost:3000/films/4
+Content-Type: application/json
+
+{
+    "title": "Invalid Movie"
+}

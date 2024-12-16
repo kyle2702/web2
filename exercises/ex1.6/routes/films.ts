@@ -143,4 +143,89 @@ router.post('/', (req, res) => {
   return res.status(201).json(newFilm);
 });
 
+// DELETE ONE
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Id must be a number' });
+  }
+
+  const filmIndex = films.findIndex(film => film.id === id);
+  if (filmIndex === -1) {
+    return res.status(404).json({ error: 'Film not found' });
+  }
+
+  films.splice(filmIndex, 1);
+  return res.sendStatus(204);
+});
+
+// PATCH ONE
+router.patch('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const updates = req.body;
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Id must be a number' });
+  }
+
+  const filmIndex = films.findIndex(film => film.id === id);
+  if (filmIndex === -1) {
+    return res.status(404).json({ error: 'Film not found' });
+  }
+
+  if (updates.duration && (typeof updates.duration !== 'number' || updates.duration <= 0)) {
+    return res.status(400).json({ error: 'Duration must be a positive number' });
+  }
+
+  if (updates.budget && (typeof updates.budget !== 'number' || updates.budget <= 0)) {
+    return res.status(400).json({ error: 'Budget must be a positive number' });
+  }
+
+  films[filmIndex] = { ...films[filmIndex], ...updates };
+  return res.json(films[filmIndex]);
+});
+
+// PUT ONE
+router.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const { title, director, duration, budget, description, imageUrl } = req.body;
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Id must be a number' });
+  }
+
+  // Validation des champs requis
+  if (!title || !director || !duration) {
+    return res.status(400).json({ error: 'title, director and duration are required' });
+  }
+
+  if (typeof title !== 'string' || typeof director !== 'string') {
+    return res.status(400).json({ error: 'title and director must be strings' });
+  }
+
+  if (typeof duration !== 'number' || duration <= 0) {
+    return res.status(400).json({ error: 'duration must be a positive number' });
+  }
+
+  if (budget && (typeof budget !== 'number' || budget <= 0)) {
+    return res.status(400).json({ error: 'budget must be a positive number' });
+  }
+
+  const filmIndex = films.findIndex(film => film.id === id);
+  const newFilm: Film = { id, title, director, duration, budget, description, imageUrl };
+
+  if (filmIndex === -1) {
+    // Vérifier si l'ID n'existe pas déjà
+    if (films.some(f => f.id === id)) {
+      return res.status(400).json({ error: 'Cannot create film with existing id' });
+    }
+    films.push(newFilm);
+    return res.status(201).json(newFilm);
+  }
+
+  films[filmIndex] = newFilm;
+  return res.json(newFilm);
+});
+
 export default router;
