@@ -4,7 +4,7 @@ import { Film } from "../types";
 
 const router = Router();
 
-const defaultFilms: Film[] = [
+const films: Film[] = [
   {
     id: 1,
     title: "Shang-Chi and the Legend of the Ten Rings",
@@ -60,10 +60,56 @@ const defaultFilms: Film[] = [
     budget: 23,
   },
 ];
-// Read all films
 
-router.get("/", (_req, res) => {
-  return res.json(defaultFilms);
+// READ ALL + FILTER
+router.get('/', (req, res) => {
+  const minDuration = req.query['minimum-duration'] ? Number(req.query['minimum-duration']) : undefined;
+
+  if (minDuration !== undefined && (isNaN(minDuration) || minDuration <= 0)) {
+      return res.status(400).json({ error: 'Wrong minimum duration' });
+  }
+
+  if (!minDuration) {
+      return res.json(films);
+  }
+
+  const filteredFilms = films.filter(film => film.duration >= minDuration);
+  return res.json(filteredFilms);
+});
+
+// READ ONE
+router.get('/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const film = films.find(film => film.id === id);
+
+  if (!film) {
+      return res.sendStatus(404);
+  }
+  
+  return res.json(film);
+});
+
+// CREATE ONE
+router.post('/', (req, res) => {
+  const { title, director, duration, budget } = req.body;
+
+  if (!title || !director || !duration) {
+      return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  if (typeof duration !== 'number' || duration <= 0) {
+      return res.status(400).json({ error: 'Invalid duration' });
+  }
+
+  if (budget && (typeof budget !== 'number' || budget <= 0)) {
+      return res.status(400).json({ error: 'Invalid budget' });
+  }
+
+  const newId = films.length > 0 ? Math.max(...films.map(f => f.id)) + 1 : 1;
+  const newFilm: Film = { id: newId, ...req.body };
+  films.push(newFilm);
+
+  return res.status(201).json(newFilm);
 });
 
 export default router;

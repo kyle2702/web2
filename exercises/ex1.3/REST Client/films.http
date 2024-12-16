@@ -1,0 +1,29 @@
+### Read all films
+GET http://localhost:3000/films
+
+### Read filtered films
+GET http://localhost:3000/films?minimum-duration=160
+
+### Read one film
+GET http://localhost:3000/films/1
+
+### Create film
+POST http://localhost:3000/films
+Content-Type: application/json
+
+{
+    "title": "The Dark Knight",
+    "director": "Christopher Nolan",
+    "duration": 152,
+    "budget": 185
+}
+
+### Test invalid duration
+POST http://localhost:3000/films
+Content-Type: application/json
+
+{
+    "title": "Test",
+    "director": "Test",
+    "duration": -1
+}
