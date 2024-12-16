@@ -29,7 +29,10 @@ const server = http.createServer(app);
 
 server.listen(port);
 server.on("error", onError);
-server.on("listening", onListening);
+server.on('listening', () => {
+  console.log(`Server accessible sur http://localhost:${port}/films`),
+  onListening;
+});
 
 /**
  * Normalize a port into a number, string, or false.
