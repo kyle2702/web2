@@ -50,39 +50,65 @@ const films = [
 ];
 // READ ALL + FILTER
 router.get('/', (req, res) => {
-    const minDuration = req.query['minimum-duration'] ? Number(req.query['minimum-duration']) : undefined;
-    if (minDuration !== undefined && (isNaN(minDuration) || minDuration <= 0)) {
-        return res.status(400).json({ error: 'Wrong minimum duration' });
+    const minDuration = req.query['minimum-duration'];
+    if (minDuration !== undefined) {
+        const duration = Number(minDuration);
+        if (isNaN(duration)) {
+            return res.status(400).json({ error: 'minimum-duration must be a number' });
+        }
+        if (duration <= 0) {
+            return res.status(400).json({ error: 'minimum-duration must be positive' });
+        }
+        return res.json(films.filter(film => film.duration >= duration));
     }
-    if (!minDuration) {
-        return res.json(films);
-    }
-    const filteredFilms = films.filter(film => film.duration >= minDuration);
-    return res.json(filteredFilms);
+    return res.json(films);
 });
 // READ ONE
 router.get('/:id', (req, res) => {
-    const id = parseInt(req.params.id, 10);
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'Id must be a number' });
+    }
     const film = films.find(film => film.id === id);
     if (!film) {
-        return res.sendStatus(404);
+        return res.status(404).json({ error: 'Film not found' });
     }
     return res.json(film);
 });
 // CREATE ONE
 router.post('/', (req, res) => {
-    const { title, director, duration, budget } = req.body;
+    const { title, director, duration, budget, description, imageUrl } = req.body;
+    // Validation des champs requis
     if (!title || !director || !duration) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'title, director and duration are required' });
+    }
+    // Validation des types et valeurs
+    if (typeof title !== 'string' || typeof director !== 'string') {
+        return res.status(400).json({ error: 'title and director must be strings' });
     }
     if (typeof duration !== 'number' || duration <= 0) {
-        return res.status(400).json({ error: 'Invalid duration' });
+        return res.status(400).json({ error: 'duration must be a positive number' });
     }
-    if (budget && (typeof budget !== 'number' || budget <= 0)) {
-        return res.status(400).json({ error: 'Invalid budget' });
+    if (budget !== undefined && (typeof budget !== 'number' || budget <= 0)) {
+        return res.status(400).json({ error: 'budget must be a positive number' });
     }
+    // Vérification si le film existe déjà
+    const filmExists = films.some(film => film.title.toLowerCase() === title.toLowerCase() &&
+        film.director.toLowerCase() === director.toLowerCase());
+    if (filmExists) {
+        return res.status(409).json({ error: 'Film already exists' });
+    }
+    // Création du nouveau film
     const newId = films.length > 0 ? Math.max(...films.map(f => f.id)) + 1 : 1;
-    const newFilm = Object.assign({ id: newId }, req.body);
+    const newFilm = {
+        id: newId,
+        title,
+        director,
+        duration,
+        budget,
+        description,
+        imageUrl
+    };
     films.push(newFilm);
     return res.status(201).json(newFilm);
 });

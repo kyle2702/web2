@@ -2,7 +2,7 @@
 GET http://localhost:3000/films
 
 ### Read filtered films
-GET http://localhost:3000/films?minimum-duration=160
+GET http://localhost:3000/films?minimum-duration=130
 
 ### Read one film
 GET http://localhost:3000/films/1
